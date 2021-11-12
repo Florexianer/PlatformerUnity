@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float speed = 30.0f;
+    public float walkSpeed = 30.0f;
     public float jumpVelocity = 50f;
+    
 
     [SerializeField] LayerMask layermask;
     Rigidbody2D rigidbody2d;
@@ -25,6 +26,7 @@ public class Player : MonoBehaviour
     {
 
     }
+
     void FixedUpdate()
     {
         //Vector2 position = rigidbody2d.position;
@@ -35,7 +37,7 @@ public class Player : MonoBehaviour
             jump(1);
         }
         //rigidbody2d.MovePosition(position);
-        rigidbody2d.velocity = new Vector2(speed * Input.GetAxis("Horizontal"), rigidbody2d.velocity.y);
+        handleMovement();
 
     }
 
@@ -44,13 +46,23 @@ public class Player : MonoBehaviour
         rigidbody2d.velocity = Vector2.up * jumpVelocity * multiplicator;
     }
 
+    public void handleMovement()
+    {
+        if(Input.GetKey(KeyCode.LeftArrow))
+        {
+            rigidbody2d.velocity = new Vector2(-walkSpeed, rigidbody2d.velocity.y);
+        } else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            rigidbody2d.velocity = new Vector2(walkSpeed, rigidbody2d.velocity.y);
+        } else
+        {
+            rigidbody2d.velocity = new Vector2(0, rigidbody2d.velocity.y);
+        }
+    }
+
     private bool isGrounded()
     {
         RaycastHit2D raycastHit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, .1f, layermask);
-        if(raycastHit2D.collider != null)
-        {
-            Debug.Log("Grounded");
-        }
         return raycastHit2D.collider != null;
     }
 
