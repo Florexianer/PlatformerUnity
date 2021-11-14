@@ -12,6 +12,11 @@ public class Player : MonoBehaviour
     Rigidbody2D rigidbody2d;
     BoxCollider2D boxCollider2D;
 
+    bool facingRight = true;
+    int allowedDash;
+    public int maxDash = 1;
+    float dashDistance = 1.5f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +24,7 @@ public class Player : MonoBehaviour
         Application.targetFrameRate = 120;
         rigidbody2d = GetComponent<Rigidbody2D>();
         boxCollider2D = GetComponent<BoxCollider2D>();
+        allowedDash = maxDash;
     }
 
     // Update is called once per frame
@@ -32,7 +38,7 @@ public class Player : MonoBehaviour
         //Vector2 position = rigidbody2d.position;
         //position.x += speed * Input.GetAxis("Horizontal") * Time.deltaTime;
         
-        if(Input.GetButton("Jump") && isGrounded())
+        if(isGrounded() && Input.GetButton("Jump"))
         {
             jump(1);
         }
@@ -48,13 +54,35 @@ public class Player : MonoBehaviour
 
     public void handleMovement()
     {
-        if(Input.GetKey(KeyCode.LeftArrow))
+        if (Input.GetKey(KeyCode.E) && allowedDash !=0) {
+            allowedDash--;
+            rigidbody2d.MovePosition(new Vector2(rigidbody2d.position.x + (facingRight ? dashDistance : -dashDistance), rigidbody2d.position.y));
+
+        } else if (Input.GetAxisRaw("Horizontal") < 0)
         {
             rigidbody2d.velocity = new Vector2(-walkSpeed, rigidbody2d.velocity.y);
-        } else if (Input.GetKey(KeyCode.RightArrow))
+            facingRight = false;
+        } else if (Input.GetAxisRaw("Horizontal") > 0)
         {
+            facingRight = true;
             rigidbody2d.velocity = new Vector2(walkSpeed, rigidbody2d.velocity.y);
         } else
+        {
+            rigidbody2d.velocity = new Vector2(0, rigidbody2d.velocity.y);
+        }
+    }
+
+    public void iceMovement()
+    {
+        if (Input.GetAxis("Horizontal") < 0)
+        {
+            rigidbody2d.velocity = new Vector2(-walkSpeed, rigidbody2d.velocity.y);
+        }
+        else if (Input.GetAxis("Horizontal") > 0)
+        {
+            rigidbody2d.velocity = new Vector2(walkSpeed, rigidbody2d.velocity.y);
+        }
+        else
         {
             rigidbody2d.velocity = new Vector2(0, rigidbody2d.velocity.y);
         }
@@ -63,7 +91,12 @@ public class Player : MonoBehaviour
     private bool isGrounded()
     {
         RaycastHit2D raycastHit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, .1f, layermask);
-        return raycastHit2D.collider != null;
+        if(raycastHit2D.collider != null)
+        {
+            allowedDash = maxDash;
+            return true;
+        }
+        return false;
     }
 
 }
