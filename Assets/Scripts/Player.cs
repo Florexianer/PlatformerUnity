@@ -6,7 +6,8 @@ public class Player : MonoBehaviour
 {
     public float walkSpeed = 30.0f;
     public float jumpVelocity = 50f;
-    
+    float horizontalSpeed;
+
 
     [SerializeField] LayerMask layermask;
     Rigidbody2D rigidbody2d;
@@ -15,7 +16,9 @@ public class Player : MonoBehaviour
     bool facingRight = true;
     int allowedDash;
     public int maxDash = 1;
-    float dashDistance = 1.5f;
+    float dashDistance = 3f;
+    bool dashPressed = false;
+    bool jumpPressed = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +33,15 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E)){
+            dashPressed = true;
+        }
 
+        if(Input.GetButtonDown("Jump")) {
+            jumpPressed = true;
+        }
+
+        horizontalSpeed = Input.GetAxisRaw("Horizontal");
     }
 
     void FixedUpdate()
@@ -38,8 +49,9 @@ public class Player : MonoBehaviour
         //Vector2 position = rigidbody2d.position;
         //position.x += speed * Input.GetAxis("Horizontal") * Time.deltaTime;
         
-        if(isGrounded() && Input.GetButton("Jump"))
+        if(isGrounded() && jumpPressed)
         {
+            jumpPressed = false;
             jump(1);
         }
         //rigidbody2d.MovePosition(position);
@@ -54,15 +66,17 @@ public class Player : MonoBehaviour
 
     public void handleMovement()
     {
-        if (Input.GetKey(KeyCode.E) && allowedDash !=0) {
+        if (dashPressed && allowedDash !=0) {
+            dashPressed = false;
             allowedDash--;
+            rigidbody2d.velocity = Vector2.zero;
             rigidbody2d.MovePosition(new Vector2(rigidbody2d.position.x + (facingRight ? dashDistance : -dashDistance), rigidbody2d.position.y));
 
-        } else if (Input.GetAxisRaw("Horizontal") < 0)
+        } else if (horizontalSpeed < 0)
         {
             rigidbody2d.velocity = new Vector2(-walkSpeed, rigidbody2d.velocity.y);
             facingRight = false;
-        } else if (Input.GetAxisRaw("Horizontal") > 0)
+        } else if (horizontalSpeed > 0)
         {
             facingRight = true;
             rigidbody2d.velocity = new Vector2(walkSpeed, rigidbody2d.velocity.y);
