@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public ParticleSystem dashAnim;
     public float walkSpeed = 30.0f;
     public float jumpVelocity = 50f;
     float horizontalSpeed;
-
 
     [SerializeField] LayerMask layermask;
     Rigidbody2D rigidbody2d;
@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         boxCollider2D = GetComponent<BoxCollider2D>();
         allowedDash = maxDash;
+
     }
 
     // Update is called once per frame
@@ -37,7 +38,7 @@ public class Player : MonoBehaviour
             dashPressed = true;
         }
 
-        if(Input.GetButtonDown("Jump")) {
+        if(isGrounded() &&Input.GetButtonDown("Jump")) {
             jumpPressed = true;
         }
 
@@ -49,7 +50,7 @@ public class Player : MonoBehaviour
         //Vector2 position = rigidbody2d.position;
         //position.x += speed * Input.GetAxis("Horizontal") * Time.deltaTime;
         
-        if(isGrounded() && jumpPressed)
+        if(jumpPressed)
         {
             jumpPressed = false;
             jump(1);
@@ -70,8 +71,8 @@ public class Player : MonoBehaviour
             dashPressed = false;
             allowedDash--;
             rigidbody2d.velocity = Vector2.zero;
+            dashAnim.Play();
             rigidbody2d.MovePosition(new Vector2(rigidbody2d.position.x + (facingRight ? dashDistance : -dashDistance), rigidbody2d.position.y));
-
         } else if (horizontalSpeed < 0)
         {
             rigidbody2d.velocity = new Vector2(-walkSpeed, rigidbody2d.velocity.y);
